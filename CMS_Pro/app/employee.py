@@ -1,8 +1,8 @@
 from flask import Blueprint, render_template, redirect, url_for, request, flash, session, abort
 from flask_login import login_user, logout_user, login_required, current_user
-from CMS_Pro_Copy.app.forms import LoginForm, BookMealForm, ProfileUpdateForm
-from CMS_Pro_Copy.app.utils import generate_meal_qr_code
-from CMS_Pro_Copy.app import mysql, User
+from .forms import LoginForm, BookMealForm, ProfileUpdateForm
+from .utils import generate_meal_qr_code
+from . import mysql, User
 import hashlib
 from datetime import date, datetime, time
 
