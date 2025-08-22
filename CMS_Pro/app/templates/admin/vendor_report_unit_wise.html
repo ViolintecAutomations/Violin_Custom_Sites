@@ -1,0 +1,268 @@
+{% extends 'base_logged_in.html' %}
+{% block title %}Vendor Report{% endblock %}
+{% block main_content %}
+<style>
+  .back-btn {
+    position: fixed;
+    top: 24px;
+    right: 24px;
+    z-index: 1000;
+    background: #6c757d;
+    border: none;
+    color: #fff;
+    font-size: 1.2rem;
+    border-radius: 50%;
+    width: 48px;
+    height: 48px;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+  }
+  .back-btn:hover {
+    background: #5a6268;
+    transform: scale(1.08);
+    box-shadow: 0 4px 16px rgba(0,0,0,0.18);
+  }
+  .vendor-report-card {
+    font-size: 1.25rem;
+    max-width: 1400px;
+    margin: 0 auto;
+    box-shadow: 0 4px 32px rgba(0,0,0,0.10);
+    border-radius: 1.5rem;
+  }
+  .vendor-report-card .card-header {
+    font-size: 2.2rem;
+    font-weight: 700;
+    padding: 2rem 2rem 1rem 2rem;
+    background: linear-gradient(90deg, #1976d2 0%, #64b5f6 100%);
+    color: #fff;
+    border-radius: 1.5rem 1.5rem 0 0;
+    text-align: center;
+  }
+  .vendor-report-card .card-body {
+    padding: 2.5rem 2.5rem 2rem 2.5rem;
+  }
+  .vendor-report-card table {
+    font-size: 1.1em;
+    border-radius: 1rem;
+    overflow: hidden;
+  }
+  .vendor-report-card th, .vendor-report-card td {
+    padding: 1rem 1.25rem;
+    vertical-align: middle;
+    text-align: center;
+  }
+  .vendor-report-card th {
+    background: #e3f2fd;
+    color: #1976d2;
+    font-size: 1.15em;
+    font-weight: 600;
+  }
+  .vendor-report-card td {
+    background: #fff;
+    color: #333;
+  }
+  .filter-section {
+    background: #f8f9fa;
+    border-radius: 1rem;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+  }
+  .filter-section h5 {
+    color: #1976d2;
+    margin-bottom: 1rem;
+  }
+  .export-btn {
+    background: linear-gradient(135deg, #28a745, #20c997);
+    border: none;
+    color: white;
+    padding: 0.75rem 1.5rem;
+    border-radius: 0.5rem;
+    font-weight: 600;
+    transition: all 0.3s ease;
+  }
+  .export-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
+    color: white;
+  }
+  .print-btn {
+    background: linear-gradient(135deg, #6c757d, #495057);
+    border: none;
+    color: white;
+    padding: 0.75rem 1.5rem;
+    border-radius: 0.5rem;
+    font-weight: 600;
+    transition: all 0.3s ease;
+  }
+  .print-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(108, 117, 125, 0.3);
+    color: white;
+  }
+  .count-badge {
+    background: linear-gradient(135deg, #ff6b6b, #ee5a52);
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 2rem;
+    font-weight: 600;
+    font-size: 0.9em;
+  }
+  .unit-badge {
+    background: linear-gradient(135deg, #4ecdc4, #44a08d);
+    color: white;
+    padding: 0.4rem 0.8rem;
+    border-radius: 1.5rem;
+    font-weight: 500;
+    font-size: 0.85em;
+  }
+  .purpose-badge {
+    background: linear-gradient(135deg, #feca57, #ff9ff3);
+    color: #2c3e50;
+    padding: 0.4rem 0.8rem;
+    border-radius: 1.5rem;
+    font-weight: 500;
+    font-size: 0.85em;
+  }
+</style>
+
+<button class="back-btn" onclick="window.location.href='{{ url_for('admin.dashboard') }}'" title="Back to Dashboard">
+  <i class="bi bi-arrow-left"></i>
+</button>
+
+<div class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-lg-12">
+      <div class="card vendor-report-card">
+        <div class="card-header text-center">
+          📊 Outsider Meal Report
+        </div>
+        <div class="card-body">
+          <!-- Filter Section -->
+          <div class="filter-section">
+            <h5><i class="bi bi-funnel me-2"></i>Filters</h5>
+            <form method="GET" class="row g-3">
+              <div class="col-md-4">
+                <label for="unit" class="form-label">Unit</label>
+                <select name="unit" id="unit" class="form-select">
+                  <option value="">All Units</option>
+                  {% for unit in units %}
+                  <option value="{{ unit }}" {% if selected_unit == unit %}selected{% endif %}>{{ unit }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+              <div class="col-md-4 d-flex align-items-end">
+                <button type="submit" class="btn btn-primary me-2">
+                  <i class="bi bi-search me-1"></i>Apply Filters
+                </button>
+                <a href="{{ url_for('admin.vendor_report_unit_wise') }}" class="btn btn-outline-secondary">
+                  <i class="bi bi-arrow-clockwise me-1"></i>Clear
+                </a>
+              </div>
+            </form>
+          </div>
+
+          <!-- Add Item Button -->
+          <button class="btn btn-primary mb-3" data-bs-toggle="modal" data-bs-target="#addVendorModal">
+            <i class="bi bi-plus-circle"></i> Add Item
+          </button>
+
+          <!-- Report Table -->
+          <div class="table-responsive">
+            <form method="POST" action="{{ url_for('admin.update_vendor_report_unit_wise') }}">
+              {{ form.hidden_tag() }}
+              <table class="table table-bordered table-hover align-middle mb-0">
+                <thead>
+                  <tr>
+                    <th>Vendor Name</th>
+                    <th>Unit</th>
+                    <th>Purpose</th>
+                    <th>Count</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% if vendor_reports|length > 0 %}
+                    {% for vendor in vendor_reports %}
+                      <tr>
+                        <td>{{ vendor.vendor_name }}</td>
+                        <td>{{ vendor.unit }}</td>
+                        <td>{{ vendor.purpose }}</td>
+                        <td>{{ vendor.count }}</td>
+                      </tr>
+                    {% endfor %}
+                  {% else %}
+                    <tr>
+                      <td colspan="4" class="text-center py-4">
+                        <div class="text-muted">
+                          <i class="bi bi-inbox fs-1 d-block mb-3"></i>
+                          No vendor data found for the selected filters.
+                        </div>
+                      </td>
+                    </tr>
+                  {% endif %}
+                </tbody>
+              </table>
+            </form>
+          </div>
+
+          <!-- Summary Stats -->
+          {# Removed summary stats as per user request #}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Action Buttons -->
+  <div class="text-center mt-4">
+    <a href="{{ url_for('admin.export_vendor_report_unit_wise', unit=selected_unit) }}" class="btn export-btn me-3">
+      <i class="bi bi-download me-1"></i>Export to Excel
+    </a>
+    <button class="btn print-btn" onclick="window.print()">
+      <i class="bi bi-printer me-1"></i>Print Report
+    </button>
+  </div>
+</div>
+
+<!-- Add Vendor Modal -->
+<div class="modal fade" id="addVendorModal" tabindex="-1" aria-labelledby="addVendorModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <form method="POST" action="{{ url_for('admin.update_vendor_report_unit_wise') }}">
+      {{ form.hidden_tag() }}
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="addVendorModalLabel">Add Vendor Item</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <div class="mb-3">
+            {{ form.name.label(class="form-label") }}
+            {{ form.name(class="form-control") }}
+          </div>
+          <div class="mb-3">
+            <label for="unit" class="form-label">Unit</label>
+            <select name="unit" class="form-select" required>
+              {% for unit in units %}
+              <option value="{{ unit }}">{{ unit }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="mb-3">
+            {{ form.purpose.label(class="form-label") }}
+            {{ form.purpose(class="form-control") }}
+          </div>
+          <div class="mb-3">
+            <label for="count" class="form-label">Count</label>
+            <input type="number" name="count" class="form-control" min="0" required>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-primary">Add</button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Bootstrap Icons CDN -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+{% endblock %} 

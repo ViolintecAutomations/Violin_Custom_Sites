@@ -1,0 +1,358 @@
+{% extends 'base.html' %}
+{% block title %}{{ _('Welcome | Canteen Management System') }}{% endblock %}
+{% block content %}
+<style>
+  .login-btn {
+    font-size: 1.5rem;
+    padding: 1.5rem 2rem;
+    border-radius: 15px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    border: none;
+    position: relative;
+    overflow: hidden;
+    min-height: 100px;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .login-tile {
+    display: flex;
+    align-items: stretch;
+    height: 100%;
+    justify-content: center;
+    margin-bottom: 0;
+    padding-left: 0;
+    padding-right: 0;
+    margin-right: 0;
+    margin-left: 0;
+    /* Add a small horizontal gap between tiles on desktop */
+    /* Only add margin-right to all but the last tile */
+  }
+  @media (min-width: 768px) {
+    .login-tile:not(:last-child) {
+      margin-right: 24px;
+    }
+  }
+  @media (min-width: 992px) {
+    .login-tile:not(:last-child) {
+      margin-right: 32px;
+    }
+  }
+  .login-btn:hover {
+    transform: scale(1.05) translateY(-5px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+    z-index: 10;
+  }
+  
+  .login-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+    transition: left 0.5s;
+  }
+  
+  .login-btn:hover::before {
+    left: 100%;
+  }
+  
+  .btn-employee {
+    background: linear-gradient(135deg, #007bff, #0056b3);
+    color: white;
+  }
+  
+  .btn-staff {
+    background: linear-gradient(135deg, #28a745, #1e7e34);
+    color: white;
+  }
+  
+  .btn-admin {
+    background: linear-gradient(135deg, #17a2b8, #138496);
+    color: white;
+  }
+  
+  .welcome-title {
+    font-size: 3rem;
+    font-weight: 700;
+    margin-bottom: 3rem;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  /* Mobile Responsiveness */
+  @media (max-width: 1199.98px) {
+    .welcome-title {
+      font-size: 2.5rem;
+      margin-bottom: 2.5rem;
+    }
+    .login-btn {
+      font-size: 1.3rem;
+      padding: 1.3rem 1.8rem;
+    }
+  }
+
+  @media (max-width: 991.98px) {
+    .welcome-title {
+      font-size: 2.2rem;
+      margin-bottom: 2rem;
+    }
+    .login-btn {
+      font-size: 1.2rem;
+      padding: 1.2rem 1.6rem;
+    }
+  }
+
+  @media (max-width: 767.98px) {
+    .welcome-title {
+      font-size: 1.8rem;
+      margin-bottom: 1.5rem;
+    }
+    .login-btn {
+      font-size: 1.1rem;
+      padding: 1rem 1.4rem;
+    }
+    .container {
+      padding: 0 1rem;
+    }
+    .login-tile {
+      margin-bottom: 0.5rem;
+      margin-right: 0;
+      margin-left: 0;
+    }
+  }
+
+  @media (max-width: 575.98px) {
+    .welcome-title {
+      font-size: 1.5rem;
+      margin-bottom: 1.2rem;
+    }
+    .login-btn {
+      font-size: 1rem;
+      padding: 0.9rem 1.2rem;
+      letter-spacing: 0.5px;
+    }
+    .container {
+      padding: 0 0.5rem;
+    }
+    .row {
+      margin: 0;
+    }
+    .col-md-4 {
+      padding: 0 0.25rem;
+    }
+    .hero-logo-circle {
+      width: 90px;
+      height: 90px;
+    }
+    .hero-logo-circle img {
+      width: 60px;
+      height: 60px;
+    }
+  }
+
+  @media (max-width: 375px) {
+    .welcome-title {
+      font-size: 1.3rem;
+      margin-bottom: 1rem;
+    }
+    .login-btn {
+      font-size: 0.9rem;
+      padding: 0.8rem 1rem;
+      letter-spacing: 0.3px;
+    }
+  }
+  .row {
+    margin-left: 0;
+    margin-right: 0;
+  }
+  .col-lg-4, .col-md-6, .col-sm-12 {
+    padding-left: 0;
+    padding-right: 0;
+  }
+  .login-tiles-row {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: stretch;
+    gap: 32px; /* Set your desired gap here */
+    width: 100%;
+  }
+  @media (max-width: 991.98px) {
+    .login-tiles-row {
+      flex-direction: column;
+      gap: 16px;
+      align-items: center;
+    }
+  }
+  .login-tile {
+    flex: 1 1 0;
+    max-width: 400px;
+    display: flex;
+    align-items: stretch;
+    justify-content: center;
+    margin-bottom: 0;
+    padding: 0;
+  }
+  .hero-illustration {
+    width: 120px;
+    margin-bottom: 1.5rem;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  .tagline {
+    font-size: 2rem;
+    color: #fff;
+    margin-bottom: 2.5rem;
+    font-weight: 500;
+  }
+  .login-tile {
+    background: #fff;
+    border-radius: 18px;
+    box-shadow: 0 2px 16px rgba(0,0,0,0.08);
+    border: 1px solid #e0e0e0;
+    transition: box-shadow 0.3s, transform 0.3s;
+    padding: 0.5rem 0.5rem;
+    animation: fadeInUp 0.7s;
+  }
+  .login-tile:hover {
+    box-shadow: 0 8px 32px rgba(33,150,243,0.18);
+    transform: translateY(-6px) scale(1.03);
+  }
+  @keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(30px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .footer {
+    width: 100%;
+    text-align: center;
+    padding: 1.2rem 0 0.5rem 0;
+    color: #888;
+    font-size: 1rem;
+    background: none;
+    margin-top: 2rem;
+  }
+  .hero-logo-circle {
+    width: 220px;
+    height: 220px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #e3f0ff 0%, #f8fbff 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1.5rem auto;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.10);
+    overflow: hidden;
+    border: 2.5px solid #fff;
+    position: relative;
+  }
+  .hero-logo-img {
+    width: 180px;
+    height: 180px;
+    object-fit: contain;
+    display: block;
+    filter: drop-shadow(0 2px 6px rgba(0,0,0,0.10));
+    z-index: 1;
+    margin: auto;
+    max-width: 100%;
+    max-height: 100%;
+  }
+  .hero-logo-circle::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    border-radius: 50%;
+    background: linear-gradient(135deg, rgba(255,255,255,0.10) 0%, rgba(255,255,255,0.18) 100%);
+    pointer-events: none;
+  }
+  .company-title {
+    color: inherit;
+    font-size: 3.2rem;
+    font-weight: 700;
+    margin-bottom: 1.2rem;
+    letter-spacing: 1px;
+    text-align: center;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .hero-logo-circle img {
+    width: 180px;
+    height: 180px;
+    object-fit: contain;
+    display: block;
+    filter: drop-shadow(0 2px 6px rgba(0,0,0,0.10));
+    z-index: 1;
+    position: static;
+    margin: 0;
+    max-width: 100%;
+    max-height: 100%;
+  }
+</style>
+
+<div class="d-flex justify-content-end align-items-center" style="position: absolute; top: 1rem; right: 1rem;">
+<div class="dropdown">
+    <button class="btn btn-secondary dropdown-toggle" type="button" id="languageDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+      <i class="bi bi-translate"></i> English
+    </button>
+    <ul class="dropdown-menu" aria-labelledby="languageDropdown">
+      <li><a class="dropdown-item {% if current_lang == 'en' %}active{% endif %}" href="?lang=en">English</a></li>
+      <li><a class="dropdown-item {% if current_lang == 'ta' %}active{% endif %}" href="?lang=ta">Tamil</a></li>
+      <li><a class="dropdown-item {% if current_lang == 'hi' %}active{% endif %}" href="?lang=hi">Hindi</a></li>
+    </ul>
+  </div>
+</div>
+
+<div class="d-flex justify-content-center align-items-center flex-column" style="min-height: 100vh;">
+  <!-- Company Heading -->
+  <h2 class="company-title">{{ _('Violin Technologies Pvt Ltd') }}</h2>
+  <!-- Hero Illustration -->
+  <div class="hero-logo-circle">
+    <img class="hero-logo-img" src="{{ url_for('static', filename='VT_Logo.png') }}" alt="{{ _('Violin Technologies Logo') }}" style="max-width: 100%; height: auto;" onerror="this.style.display='none'; this.insertAdjacentHTML('afterend', `<span style='color:#888; font-size:0.9rem;'>{{ _('Logo not found') }}</span>`);">
+  </div>
+  <div class="text-center w-100">
+    <h1 class="welcome-title mb-2">{{ _('Smart Canteen Management System (CMS)') }} <span class="chef-emoji">👨‍🍳</span></h1>
+    <div class="tagline mb-4">{{ _('Smart Canteen Management System for Employees') }}</div>
+    <div class="login-tiles-row">
+      <div class="login-tile">
+        <a href="{{ url_for('employee.login') }}" class="btn login-btn btn-employee w-100">
+          <i class="bi bi-person-badge me-2"></i>
+          {{ _('Violin Technology Employee Login') }}
+        </a>
+      </div>
+      <div class="login-tile">
+        <a href="{{ url_for('staff.login') }}" class="btn login-btn btn-staff w-100">
+          <i class="bi bi-people-fill me-2"></i>
+          {{ _('Canteen Supervisor Login') }}
+        </a>
+      </div>
+      <div class="login-tile">
+        <a href="{{ url_for('admin.login') }}" class="btn login-btn btn-admin w-100">
+          <i class="bi bi-shield-check me-2"></i>
+          {{ _('Admin/HR/Finance Login') }}
+        </a>
+      </div>
+    </div>
+  </div>
+  <footer class="footer fixed-bottom" style="background: none; width: 100%; text-align: center; padding: 1.2rem 0 0.5rem 0; color: #888; font-size: 1rem; left: 0;">
+    &copy; 2025 {{ _('Violin Technologies Pvt. Ltd. All rights reserved.') }}
+  </footer>
+</div>
+
+<!-- Bootstrap Icons CDN -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+{% endblock %} 

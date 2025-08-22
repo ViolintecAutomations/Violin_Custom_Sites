@@ -1,0 +1,352 @@
+{% extends 'base_logged_in.html' %}
+{% block title %}Vendor Report{% endblock %}
+{% block main_content %}
+<style>
+  .back-btn {
+    position: fixed;
+    top: 24px;
+    right: 24px;
+    z-index: 1000;
+    background: #6c757d;
+    border: none;
+    color: #fff;
+    font-size: 1.2rem;
+    border-radius: 50%;
+    width: 48px;
+    height: 48px;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+  }
+  .back-btn:hover {
+    background: #5a6268;
+    transform: scale(1.08);
+    box-shadow: 0 4px 16px rgba(0,0,0,0.18);
+  }
+  .vendor-report-card {
+    font-size: 1.25rem;
+    max-width: 1400px;
+    margin: 0 auto;
+    box-shadow: 0 4px 32px rgba(0,0,0,0.10);
+    border-radius: 1.5rem;
+  }
+  .vendor-report-card .card-header {
+    font-size: 2.2rem;
+    font-weight: 700;
+    padding: 2rem 2rem 1rem 2rem;
+    background: linear-gradient(90deg, #1976d2 0%, #64b5f6 100%);
+    color: #fff;
+    border-radius: 1.5rem 1.5rem 0 0;
+    text-align: center;
+  }
+  .vendor-report-card .card-body {
+    padding: 2.5rem 2.5rem 2rem 2.5rem;
+  }
+  .vendor-report-card table {
+    font-size: 1.1em;
+    border-radius: 1rem;
+    overflow: hidden;
+  }
+  .vendor-report-card th, .vendor-report-card td {
+    padding: 1rem 1.25rem;
+    vertical-align: middle;
+    text-align: center;
+  }
+  .vendor-report-card th {
+    background: #e3f2fd;
+    color: #1976d2;
+    font-size: 1.15em;
+    font-weight: 600;
+  }
+  .vendor-report-card td {
+    background: #fff;
+    color: #333;
+  }
+  .filter-section {
+    background: #f8f9fa;
+    border-radius: 1rem;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+  }
+  .filter-section h5 {
+    color: #1976d2;
+    margin-bottom: 1rem;
+  }
+  .export-btn {
+    background: linear-gradient(135deg, #28a745, #20c997);
+    border: none;
+    color: white;
+    padding: 0.75rem 1.5rem;
+    border-radius: 0.5rem;
+    font-weight: 600;
+    transition: all 0.3s ease;
+  }
+  .export-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
+    color: white;
+  }
+  .print-btn {
+    background: linear-gradient(135deg, #6c757d, #495057);
+    border: none;
+    color: white;
+    padding: 0.75rem 1.5rem;
+    border-radius: 0.5rem;
+    font-weight: 600;
+    transition: all 0.3s ease;
+  }
+  .print-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(108, 117, 125, 0.3);
+    color: white;
+  }
+  .count-badge {
+    background: linear-gradient(135deg, #ff6b6b, #ee5a52);
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 2rem;
+    font-weight: 600;
+    font-size: 0.9em;
+  }
+  .unit-badge {
+    background: linear-gradient(135deg, #4ecdc4, #44a08d);
+    color: white;
+    padding: 0.4rem 0.8rem;
+    border-radius: 1.5rem;
+    font-weight: 500;
+    font-size: 0.85em;
+  }
+  .purpose-badge {
+    background: linear-gradient(135deg, #feca57, #ff9ff3);
+    color: #2c3e50;
+    padding: 0.4rem 0.8rem;
+    border-radius: 1.5rem;
+    font-weight: 500;
+    font-size: 0.85em;
+  }
+</style>
+
+<button class="back-btn" onclick="window.location.href='{{ url_for('admin.dashboard') }}';" title="Back to Dashboard">
+  <i class="bi bi-arrow-left"></i>
+</button>
+
+<div class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-lg-12">
+      <div class="card vendor-report-card">
+        <div class="card-header text-center">
+          📊 Vendor Report
+        </div>
+        <div class="card-body">
+          <!-- Filter Section -->
+          <div class="filter-section mb-4">
+            <h5 class="mb-3">Filter Vendor Report</h5>
+            <form method="GET" action="{{ url_for('admin.vendor_report') }}" class="row g-3 align-items-end">
+              <div class="col-md-4">
+                <label for="purposeFilter" class="form-label">Filter by Purpose:</label>
+                <select class="form-select" id="purposeFilter" name="purpose" onchange="this.form.submit()">
+                  <option value="">All Purposes</option>
+                  {% for purpose in purposes %}
+                    <option value="{{ purpose }}" {% if purpose == selected_purpose %}selected{% endif %}>{{ purpose }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+              <div class="col-md-4">
+                <label for="unitFilter" class="form-label">Filter by Unit:</label>
+                <select class="form-select" id="unitFilter" name="unit" onchange="this.form.submit()">
+                  <option value="">All Units</option>
+                  {% for unit in units %}
+                    <option value="{{ unit }}" {% if unit == selected_unit %}selected{% endif %}>{{ unit }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+              <div class="col-md-4 d-flex justify-content-end">
+                <button type="submit" class="btn btn-primary me-2">Apply Filters</button>
+                <a href="{{ url_for('admin.vendor_report') }}" class="btn btn-secondary">Clear Filters</a>
+              </div>
+            </form>
+          </div>
+
+          <!-- Report Table -->
+          <div class="table-responsive">
+            <table class="table table-bordered table-hover align-middle mb-0">
+              <thead>
+                <tr>
+                  <th>Vendor Name</th>
+                  <th>Unit</th>
+                  <th>Food Licence</th>
+                  <th>Agreement for Approval</th>
+                  <th>Actions</th>
+                  <th></th> <!-- New column for Edit button -->
+                </tr>
+              </thead>
+              <tbody>
+                {% if vendor_reports|length > 0 %}
+                  {% for vendor in vendor_reports %}
+                    <tr data-vendor-name="{{ vendor.vendor_name }}">
+                      <form class="vendor-form" method="POST" action="{{ url_for('admin.update_vendor_details') }}" enctype="multipart/form-data">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
+                        <input type="hidden" name="vendor_name" value="{{ vendor.vendor_name }}">
+                        <td>{{ vendor.vendor_name }}</td>
+                        <td>{{ vendor.unit }}</td>
+                        <td>
+                          <div class="licence-display">
+                            {% if vendor.food_licence_path %}
+                              <a href="{{ url_for('static', filename=vendor.food_licence_path.replace('\\', '/')) }}" target="_blank" class="current-licence-link">View Licence</a>
+                              <span class="current-licence-name mt-1 text-muted">{{ vendor.food_licence_path.split('/')[-1] }}</span>
+                            {% else %}
+                              <span class="no-licence-text">No licence uploaded</span>
+                            {% endif %}
+                          </div>
+                          <input type="file" name="food_licence" class="form-control mt-2 edit-field food-licence-input" accept=".pdf" disabled style="display: none;">
+                          <span class="file-name-display mt-1 text-muted new-licence-name" style="display: none;"></span>
+                        </td>
+                        <td>
+                          <input type="date" name="agreement_date" class="form-control edit-field" value="{{ vendor.agreement_date.strftime('%Y-%m-%d') if vendor.agreement_date else '' }}" disabled>
+                          {% if vendor.remaining_days is not none %}
+                            <span class="text-muted">
+                              {% if vendor.remaining_days > 0 %}
+                                {{ vendor.remaining_days }} days remaining
+                              {% else %}
+                                Expired
+                              {% endif %}
+                            </span>
+                          {% endif %}
+                        </td>
+                        <td>
+                          <button type="submit" class="btn btn-primary btn-sm save-btn" disabled>Save</button>
+                        </td>
+                      </form>
+                      <td>
+                        <a href="{{ url_for('admin.edit_vendor', vendor_name=vendor.vendor_name) }}" class="btn btn-info btn-sm edit-btn">Edit</a>
+                      </td>
+                    </tr>
+                  {% endfor %}
+                {% else %}
+                  <tr>
+                    <td colspan="6" class="text-center py-4">
+                      <div class="text-muted">
+                        <i class="bi bi-inbox fs-1 d-block mb-3"></i>
+                        No vendor data found.
+                      </div>
+                    </td>
+                  </tr>
+                {% endif %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Action Buttons -->
+  <div class="text-center mt-4">
+    <a href="{{ url_for('admin.export_vendor_report_unit_wise', purpose=selected_purpose) }}" class="btn export-btn me-3">
+      <i class="bi bi-download me-1"></i>Export to Excel
+    </a>
+    <button class="btn print-btn me-3" onclick="window.print()">
+      <i class="bi bi-printer me-1"></i>Print Report
+    </button>
+    <a href="{{ url_for('admin.add_vendor_item') }}" class="btn btn-success">
+      <i class="bi bi-plus-circle me-1"></i>Add Vendor Item
+    </a>
+  </div>
+</div>
+
+<!-- Bootstrap Icons CDN -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+{% endblock %}
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    console.log('vendor_report.html script loaded and DOMContentLoaded fired.'); // Added for debugging
+    // Function to initialize/re-initialize event listeners
+    function initializeEventListeners() {
+      document.querySelectorAll('.edit-btn').forEach(button => {
+        // Remove existing listener to prevent duplicates if called multiple times
+        button.removeEventListener('click', handleEditButtonClick);
+        button.addEventListener('click', handleEditButtonClick);
+      });
+
+      document.querySelectorAll('.vendor-form').forEach(form => {
+        form.removeEventListener('submit', handleFormSubmit);
+        form.addEventListener('submit', handleFormSubmit);
+      });
+
+      document.querySelectorAll('.food-licence-input').forEach(input => {
+        input.removeEventListener('change', handleFileChange);
+        input.addEventListener('change', handleFileChange);
+      });
+    }
+
+    function handleEditButtonClick() {
+      console.log('Edit button clicked!');
+      const row = this.closest('tr');
+      
+      // Enable all edit fields
+      row.querySelectorAll('.edit-field').forEach(field => {
+        field.disabled = false;
+      });
+      
+      // Handle food licence specific display
+      const foodLicenceInput = row.querySelector('.food-licence-input');
+      const currentLicenceDisplay = row.querySelector('.licence-display');
+      const newLicenceNameDisplay = row.querySelector('.new-licence-name');
+
+      if (currentLicenceDisplay) {
+        currentLicenceDisplay.style.display = 'none'; // Hide "View Licence" / "No licence uploaded"
+      }
+      if (foodLicenceInput) {
+        foodLicenceInput.style.display = 'block'; // Show the file input
+      }
+      if (newLicenceNameDisplay) {
+        newLicenceNameDisplay.style.display = 'block'; // Show the new file name display
+      }
+
+      row.querySelector('.save-btn').disabled = false;
+      this.style.display = 'none'; // Hide edit button
+    }
+
+    function handleFormSubmit() {
+      const saveBtn = this.querySelector('.save-btn');
+      saveBtn.textContent = 'Saving...';
+      saveBtn.disabled = true;
+    }
+
+    function handleFileChange() {
+      const fileNameDisplay = this.nextElementSibling; // This is now .new-licence-name
+      if (this.files.length > 0) {
+        fileNameDisplay.textContent = `Selected: ${this.files[0].name}`;
+        fileNameDisplay.style.display = 'block';
+      } else {
+        fileNameDisplay.textContent = '';
+        fileNameDisplay.style.display = 'none';
+      }
+    }
+
+    // Check for flash messages to indicate successful save
+    const flashMessages = document.querySelectorAll('.alert-success');
+    if (flashMessages.length > 0) {
+      flashMessages.forEach(msg => {
+        const vendorName = new URLSearchParams(window.location.search).get('vendor_name');
+        if (vendorName) {
+          const row = document.querySelector(`tr[data-vendor-name="${vendorName}"]`);
+          if (row) {
+            const saveBtn = row.querySelector('.save-btn');
+            saveBtn.textContent = 'Saved';
+            saveBtn.disabled = true;
+            row.querySelectorAll('.edit-field').forEach(field => {
+              field.disabled = true;
+            });
+            const editBtn = row.querySelector('.edit-btn');
+            if (editBtn) {
+              editBtn.style.display = 'inline-block';
+            }
+          }
+        }
+      });
+    }
+
+    // Initial call to set up event listeners
+    initializeEventListeners();
+  });
+</script>

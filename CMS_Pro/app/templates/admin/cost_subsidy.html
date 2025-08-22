@@ -1,0 +1,153 @@
+{% extends 'base.html' %}
+{% block title %}Cost & Subsidy Analysis{% endblock %}
+{% block content %}
+<style>
+  .back-btn {
+    position: fixed;
+    top: 24px;
+    left: 24px;
+    z-index: 1000;
+    background: #6c757d;
+    border: none;
+    color: #fff;
+    font-size: 1.2rem;
+    border-radius: 50%;
+    width: 48px;
+    height: 48px;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+  }
+  .back-btn:hover {
+    background: #5a6268;
+    transform: scale(1.08);
+    box-shadow: 0 4px 16px rgba(0,0,0,0.18);
+  }
+  .cost-subsidy-card {
+    font-size: 1.25rem;
+    max-width: 1100px;
+    margin: 0 auto;
+    box-shadow: 0 4px 32px rgba(0,0,0,0.10);
+    border-radius: 1.5rem;
+  }
+  .cost-subsidy-card .card-header {
+    font-size: 2.2rem;
+    font-weight: 700;
+    padding: 2rem 2rem 1rem 2rem;
+    background: linear-gradient(90deg, #1976d2 0%, #64b5f6 100%);
+    color: #fff;
+    border-radius: 1.5rem 1.5rem 0 0;
+    text-align: center;
+  }
+  .cost-subsidy-card .card-body {
+    padding: 2.5rem 2.5rem 2rem 2.5rem;
+  }
+  .cost-subsidy-card table {
+    font-size: 1.1em;
+    border-radius: 1rem;
+    overflow: hidden;
+  }
+  .cost-subsidy-card th, .cost-subsidy-card td {
+    padding: 1rem 1.25rem;
+    vertical-align: middle;
+    text-align: center;
+  }
+  .cost-subsidy-card th {
+    background: #e3f2fd;
+    color: #1976d2;
+    font-size: 1.15em;
+    font-weight: 600;
+  }
+  .cost-subsidy-card td {
+    background: #fff;
+    color: #333;
+  }
+</style>
+<button class="back-btn" onclick="window.location.href='{{ url_for('admin.dashboard') }}'" title="Back to Dashboard">
+  <i class="bi bi-arrow-left"></i>
+</button>
+<div class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-lg-12">
+      <div class="card cost-subsidy-card">
+        <div class="card-header text-center">
+          💰 Cost & Subsidy Analysis
+        </div>
+        <div class="card-body">
+          <form class="row g-3 mb-4" method="get" action="{{ url_for('admin.cost_subsidy') }}">
+            <div class="col-md-3">
+              <input type="text" class="form-control" name="employee" placeholder="Filter by Employee Name" value="{{ request.args.get('employee', '') }}">
+            </div>
+            <div class="col-md-3">
+              <select class="form-control" name="department">
+                <option value="">All Departments</option>
+                {% for dept in departments %}
+                <option value="{{ dept.name }}" {% if request.args.get('department') == dept.name %}selected{% endif %}>{{ dept.name }}</option>
+                {% endfor %}
+              </select>
+            </div>
+            <div class="col-md-3">
+              <select class="form-control" name="unit">
+                <option value="">All Locations</option>
+                {% for unit in units %}
+                <option value="{{ unit.name }}" {% if request.args.get('unit') == unit.name %}selected{% endif %}>{{ unit.name }}</option>
+                {% endfor %}
+              </select>
+            </div>
+            <div class="col-md-3 d-flex align-items-center">
+              <button type="submit" class="btn btn-primary me-2"><i class="bi bi-funnel"></i> Filter</button>
+              <a href="{{ url_for('admin.cost_subsidy') }}" class="btn btn-secondary me-2"><i class="bi bi-x-circle"></i> Clear</a>
+              <a id="export-link" class="btn btn-success"><i class="bi bi-download"></i> Export</a>
+            </div>
+          </form>
+          <div class="table-responsive">
+            <table class="table table-bordered table-hover align-middle mb-0">
+              <thead>
+                <tr>
+                  <th>Employee</th>
+                  <th>Department</th>
+                  <th>Location</th>
+                  <th>Meals Booked</th>
+                  <th>Total Cost</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for row in cost_subsidy_data %}
+                <tr>
+                  <td>{{ row.employee }}</td>
+                  <td>{{ row.department }}</td>
+                  <td>{{ row.unit }}</td>
+                  <td>{{ row.meals_booked }}</td>
+                  <td>₹{{ row.total_cost }}</td>
+                </tr>
+                {% endfor %}
+                {% if cost_subsidy_data|length == 0 %}
+                <tr>
+                  <td colspan="5" class="text-center text-muted">No data available.</td>
+                </tr>
+                {% endif %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- Bootstrap Icons CDN -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+<script>
+document.getElementById('export-link').onclick = function(e) {
+    const employeeFilter = document.querySelector('input[name="employee"]').value;
+    const departmentFilter = document.querySelector('select[name="department"]').value;
+    const unitFilter = document.querySelector('select[name="unit"]').value;
+    let url = "/admin/export_cost_subsidy?";
+    const params = [];
+    if (employeeFilter) params.push("employee=" + encodeURIComponent(employeeFilter));
+    if (departmentFilter) params.push("department=" + encodeURIComponent(departmentFilter));
+    if (unitFilter) params.push("unit=" + encodeURIComponent(unitFilter));
+    url += params.join("&");
+    this.href = url;
+    // Let the browser handle the download
+};
+</script>
+{% endblock %} 
